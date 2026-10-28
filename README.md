@@ -42,7 +42,7 @@ Camadas (cada uma com uma responsabilidade):
 |---|---|
 | **Duplicatas** (o mesmo pacote chega por vários gateways) | Chave `(from, id)` em `jonah_pacotes_vistos` com `INSERT IGNORE`. **Nunca pelo conteúdo**: duas leituras com valores idênticos mas `id` diferente são medições distintas. A primeira cópia recebida fica; as demais vão para `jonah_duplicatas` e são contadas. |
 | **Relógio errado do nó** | O tempo de referência é sempre `recebido_em`. O `timestamp` do nó vira só atributo (`instante_no`) e é marcado `instante_no_valido = 0` se ausente/0, anterior a 2024-01-01 ou posterior a `recebido_em + 5 min`. Cada caso é contado (`timestamp_invalido:ausente`, `:antes_2024`, `:futuro`). |
-| **Lacunas** | Sem interpolação. A ausência é informação: a consulta 3 mostra silêncio atual e maior intervalo por nó, e `jonah_lacunas` registra cada intervalo maior que 2 × `INTERVALO_ESPERADO_MIN` (padrão 15 min, ou seja, 30 min). Pacote que chega tarde recalcula as lacunas vizinhas. |
+| **Lacunas** | Sem interpolação. A ausência é informação: a consulta 3 mostra silêncio atual e maior intervalo por nó, e `jonah_lacunas` registra cada intervalo maior que 2 × `INTERVALO_ESPERADO_MIN` (padrão 30 min, o mínimo de telemetria do firmware no canal público; ou seja, lacuna acima de 60 min). Pacote que chega tarde recalcula as lacunas vizinhas. |
 | **Esquemas variáveis** | Separação por tipo (`telemetry` gera métricas; `position`, `nodeinfo`, `text`, `neighborinfo`, `traceroute` etc. são validados e contados como `sem_metrica`). Aceita `snake_case` e `camelCase` (`battery_level`/`batteryLevel`) e métricas aninhadas em `device_metrics`/`environment_metrics`. Cada valor é checado (numérico, finito, dentro de faixa física). |
 | **Quarentena** | JSON inválido (`mensagem_raw`), `mensagem` ausente ou não objeto, `from`/`id`/`type` faltando, `type` desconhecido, payload ausente, valor não numérico, valor fora de faixa, telemetria sem nenhuma métrica conhecida. Vai para `jonah_quarentena` com `bruto_id`, `motivo`, `detalhe`, `recebido_em` e o documento original em JSON. Um pacote com qualquer campo inválido é rejeitado inteiro: não se grava metade de um pacote. |
 
@@ -71,7 +71,7 @@ python -m pipeline.main            # loop contínuo
 python -m pipeline.main --uma-vez  # processa o pendente e sai
 ```
 
-Variáveis (`.env.example`): `MONGO_URI`, `MONGO_DB`, `MONGO_COLLECTION` (`sensores` no servidor atual; `pacotes_brutos` no contrato da ativ. 9), `FONTE_FORMATO`, `MARIADB_URL`, `REDIS_URL`, `PREFIXO=jonah`, `POLL_SEGUNDOS` (intervalo do polling), `LOTE`, `SOBREPOSICAO_SEGUNDOS`, `INTERVALO_ESPERADO_MIN`. O modo padrão é polling, o mais seguro: não depende de replica set (change streams exigem um).
+Variáveis (`.env.example`): `MONGO_URI`, `MONGO_DB`, `MONGO_COLLECTION` (`pacotes_brutos`, contrato da ativ. 9; o esquema legado `sensores` da turma também é aceito), `FONTE_FORMATO`, `MARIADB_URL`, `REDIS_URL`, `PREFIXO=jonah`, `POLL_SEGUNDOS` (intervalo do polling), `LOTE`, `SOBREPOSICAO_SEGUNDOS`, `INTERVALO_ESPERADO_MIN`. O modo padrão é polling, o mais seguro: não depende de replica set (change streams exigem um).
 
 ### Formato da fonte (adaptador)
 
@@ -83,7 +83,7 @@ Variáveis (`.env.example`): `MONGO_URI`, `MONGO_DB`, `MONGO_COLLECTION` (`senso
 
 A quarentena guarda o documento **original** da fonte. O pipeline é só leitura na origem. As tabelas criadas são apenas as `jonah_*`; o banco de destino pode conter tabelas de outros alunos e elas não são tocadas.
 
-Observação: com os dados reais vistos até agora (tipos `text` e `nodeinfo`, `timestamp` = 0), a série `jonah_serie` fica vazia até chegar telemetria; os contadores, a dedup, o relógio inválido, a quarentena e o cadastro de nós (`jonah_nos`, vindo de `nodeinfo`) já funcionam. As consultas 1 e 2 só terão linhas com telemetria de dispositivo.
+Operação real: desde 27/10/2026 às 13:50 (horário de Brasília) o rádio `!8fa673bc` (Heltec V4) publica telemetria de dispositivo a cada 30 min, e o pipeline lê `iot.pacotes_brutos`. Com um único nó publicando, as três consultas já retornam resultados reais, mas os casos de três ou mais nós e de nó por salto ainda não aparecem nos dados reais. Para exercitar todos os caminhos do código há uma **simulação acelerada de 72 h**, identificada como tal, em tabelas separadas (`jonahsim_*`): `ferramentas/simular_72h.py` e `docs/simulacao_72h/relatorio_simulacao.md`.
 
 ### Docker
 
@@ -140,7 +140,8 @@ Rodam sem serviços reais (mongomock, fakeredis, SQLite): deduplicação entre g
 ## Documentação
 
 - `docs/modelo_de_dados.md`: tabelas, chaves Redis e a justificativa de cada escolha.
-- `docs/artigo_linkedin_rascunho.md`: rascunho do artigo (com marcadores `[PREENCHER: ...]`).
+- `docs/simulacao_72h/relatorio_simulacao.md`: contadores e consultas da simulação (dados gerados por programa, não são medição real).
+- `docs/artigo_linkedin.md` e `docs/artigo/`: texto e figuras do artigo publicado no LinkedIn, [Do pacote bruto ao dado útil](https://www.linkedin.com/pulse/do-pacote-bruto-ao-dado-%C3%BAtil-jonah-nishimura-kunihiro-s5kmf/).
 
 ---
 Atividade da disciplina Projeto Integrador de Big Data (IAL220), Fatec Pompeia, professor Allan Siriani.

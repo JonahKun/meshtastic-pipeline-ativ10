@@ -17,7 +17,7 @@ class Config:
     poll_segundos: float = 10.0
     lote: int = 500
     sobreposicao_segundos: int = 120
-    intervalo_esperado_min: int = 15
+    intervalo_esperado_min: int = 30  # minimo de telemetria do firmware no canal publico
 
     @property
     def limite_lacuna_s(self) -> int:
@@ -45,7 +45,7 @@ def carregar(usar_dotenv: bool = True) -> Config:
         poll_segundos=float(env.get("POLL_SEGUNDOS", "10")),
         lote=int(env.get("LOTE", "500")),
         sobreposicao_segundos=int(env.get("SOBREPOSICAO_SEGUNDOS", "120")),
-        intervalo_esperado_min=int(env.get("INTERVALO_ESPERADO_MIN", "15")),
+        intervalo_esperado_min=int(env.get("INTERVALO_ESPERADO_MIN", "30")),
     )
 
 
