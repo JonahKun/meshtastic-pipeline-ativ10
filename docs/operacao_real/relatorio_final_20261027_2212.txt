@@ -1,0 +1,71 @@
+Relatorio gerado em 27/10/2026 22:12 (horario de Brasilia), antes de parar o pipeline e restaurar o radio !8fa673bc.
+
+RELATORIO DE CONTADORES (jonah_*)
+============================================================
+Periodo coberto (recebido_em, UTC): 2026-10-27 16:50:18.119000 ate 2026-10-28 00:50:20.947000
+Nos distintos: 1
+Checkpoint: 2026-10-28 00:50:20.947000
+
+Contadores cumulativos (jonah_contadores)
+  processados                             19
+  validos                                 19
+  duplicatas                               0
+  timestamp_invalido                       0
+  quarentena                               0
+  sem_metrica                              2
+  medidas                                 85
+
+Timestamps invalidos por motivo
+  (nenhum)
+
+Quarentena por motivo
+  (nenhum)
+
+Pacotes validos por tipo
+  nodeinfo                                 2
+  telemetry                               17
+
+Linhas por tabela (contagem direta)
+  jonah_pacotes_vistos                      19
+  jonah_duplicatas                           0
+  jonah_serie                               85
+  jonah_agg_hora                            45
+  jonah_agg_dia                             10
+  jonah_quarentena                           0
+  jonah_lacunas                              0
+
+Conferencia: validos + duplicatas + quarentena = 19 | processados = 19  [OK]
+
+
+== 01_tensao_media_bateria_por_no_por_dia.sql ==
++-----------+------------+----------------+--------------+--------------+----------+
+| no        | dia        | tensao_media_v | tensao_min_v | tensao_max_v | leituras |
++-----------+------------+----------------+--------------+--------------+----------+
+| !8fa673bc | 2026-10-28 | 4.447          | 4.447        | 4.448        | 2        |
+| !8fa673bc | 2026-10-27 | 4.448          | 4.444        | 4.449        | 15       |
++-----------+------------+----------------+--------------+--------------+----------+
+(2 linha(s))
+
+== 02_utilizacao_canal_por_hora.sql ==
++---------------------+---------------+----------------------+--------------------+----------+
+| hora_utc            | nos_com_dados | utilizacao_media_pct | utilizacao_max_pct | leituras |
++---------------------+---------------+----------------------+--------------------+----------+
+| 2026-10-28 00:00:00 | 1             | 0.0                  | 0.0                | 2        |
+| 2026-10-27 23:00:00 | 1             | 0.0                  | 0.0                | 2        |
+| 2026-10-27 22:00:00 | 1             | 0.81                 | 1.61               | 2        |
+| 2026-10-27 21:00:00 | 1             | 0.0                  | 0.0                | 2        |
+| 2026-10-27 20:00:00 | 1             | 0.0                  | 0.0                | 2        |
+| 2026-10-27 19:00:00 | 1             | 0.81                 | 1.61               | 2        |
+| 2026-10-27 18:00:00 | 1             | 0.0                  | 0.0                | 2        |
+| 2026-10-27 17:00:00 | 1             | 0.0                  | 0.0                | 2        |
+| 2026-10-27 16:00:00 | 1             | 0.0                  | 0.0                | 1        |
++---------------------+---------------+----------------------+--------------------+----------+
+(9 linha(s))
+
+== 03_tempo_de_silencio_por_no.sql ==
++-----------+---------+----------------------------+--------------------+---------------------+---------+
+| no        | pacotes | ultimo_pacote_utc          | silencio_atual_min | maior_intervalo_min | lacunas |
++-----------+---------+----------------------------+--------------------+---------------------+---------+
+| !8fa673bc | 19      | 2026-10-28 00:50:20.947000 | 22.1               | 30.0                | 0       |
++-----------+---------+----------------------------+--------------------+---------------------+---------+
+(1 linha(s))

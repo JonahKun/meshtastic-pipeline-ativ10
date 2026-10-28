@@ -83,7 +83,7 @@ Variáveis (`.env.example`): `MONGO_URI`, `MONGO_DB`, `MONGO_COLLECTION` (`pacot
 
 A quarentena guarda o documento **original** da fonte. O pipeline é só leitura na origem. As tabelas criadas são apenas as `jonah_*`; o banco de destino pode conter tabelas de outros alunos e elas não são tocadas.
 
-Operação real: desde 27/10/2026 às 13:50 (horário de Brasília) o rádio `!8fa673bc` (Heltec V4) publica telemetria de dispositivo a cada 30 min, e o pipeline lê `iot.pacotes_brutos`. Com um único nó publicando, as três consultas já retornam resultados reais, mas os casos de três ou mais nós e de nó por salto ainda não aparecem nos dados reais. Para exercitar todos os caminhos do código há uma **simulação acelerada de 72 h**, identificada como tal, em tabelas separadas (`jonahsim_*`): `ferramentas/simular_72h.py` e `docs/simulacao_72h/relatorio_simulacao.md`.
+Operação real: em 27/10/2026, das 13:50 às 22:12 (horário de Brasília, cerca de 8 h 20 min), o rádio `!8fa673bc` (Heltec V4) publicou telemetria de dispositivo a cada 30 min e o pipeline leu `iot.pacotes_brutos`. A coleta foi encerrada antes das 72 h do enunciado; os contadores e as consultas finais estão em `docs/operacao_real/relatorio_final_20261027_2212.txt` (19 pacotes processados, 85 medidas, conferência fechada). Com um único nó publicando, os casos de três ou mais nós e de nó por salto não aparecem nos dados reais. O checkpoint permanece gravado, então o pipeline retoma do ponto em que parou se o gateway voltar a publicar. Para exercitar todos os caminhos do código há uma **simulação acelerada de 72 h**, identificada como tal, em tabelas separadas (`jonahsim_*`): `ferramentas/simular_72h.py` e `docs/simulacao_72h/relatorio_simulacao.md`.
 
 ### Docker
 

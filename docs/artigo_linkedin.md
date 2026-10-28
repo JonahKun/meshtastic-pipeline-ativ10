@@ -1,6 +1,6 @@
 # Do pacote bruto ao dado útil
 
-> Texto do artigo publicado no LinkedIn em 27/10/2026: [Do pacote bruto ao dado útil](https://www.linkedin.com/pulse/do-pacote-bruto-ao-dado-%C3%BAtil-jonah-nishimura-kunihiro-s5kmf/). Os números reais são um retrato de 27/10/2026 às 20:20 e serão atualizados ao fim da janela de 72 h (30/10/2026 às 13:50).
+> Texto do artigo publicado no LinkedIn em 27/10/2026 e atualizado no mesmo dia: [Do pacote bruto ao dado útil](https://www.linkedin.com/pulse/do-pacote-bruto-ao-dado-%C3%BAtil-jonah-nishimura-kunihiro-s5kmf/). A operação real foi de 27/10/2026, 13:50 a 22:12; os contadores finais estão em `docs/operacao_real/relatorio_final_20261027_2212.txt`.
 
 ![capa](artigo/00_capa.png)
 
@@ -14,7 +14,7 @@
 
 ## Resumo
 
-Este artigo apresenta um pipeline contínuo que lê os pacotes brutos da rede LoRa em malha Meshtastic armazenados no MongoDB e os converte em uma série temporal limpa e em agregados horários e diários no MariaDB, mantendo no Redis o último valor de cada nó e métrica. São tratados os quatro problemas do dado bruto definidos no enunciado: duplicatas, identificadas pelo par (nó de origem, id do pacote); relógios de nó incorretos, substituídos pelo instante de recebimento como referência temporal; lacunas, registradas como informação, sem interpolação; e esquemas variáveis, validados por tipo de pacote, com quarentena contável e motivada. A reinicialização segura combina leitura pelo menos uma vez com escrita idempotente e checkpoint gravado na mesma transação dos dados. Os resultados são apresentados em duas fontes mantidas separadas: a operação real, iniciada em 27/10/2026 às 13:50 e ainda em curso, com um nó publicando telemetria; e uma simulação de 72 horas, com pacotes gerados por programa e processados pelo próprio pipeline. Em ambas, a conferência entre contadores fecha sem divergência. A validação com três ou mais nós reais e com nó alcançado por salto ainda depende de dados que a rede não produziu.
+Este artigo apresenta um pipeline contínuo que lê os pacotes brutos da rede LoRa em malha Meshtastic armazenados no MongoDB e os converte em uma série temporal limpa e em agregados horários e diários no MariaDB, mantendo no Redis o último valor de cada nó e métrica. São tratados os quatro problemas do dado bruto definidos no enunciado: duplicatas, identificadas pelo par (nó de origem, id do pacote); relógios de nó incorretos, substituídos pelo instante de recebimento como referência temporal; lacunas, registradas como informação, sem interpolação; e esquemas variáveis, validados por tipo de pacote, com quarentena contável e motivada. A reinicialização segura combina leitura pelo menos uma vez com escrita idempotente e checkpoint gravado na mesma transação dos dados. Os resultados são apresentados em duas fontes mantidas separadas: a operação real, realizada em 27/10/2026 das 13:50 às 22:12, com um nó publicando telemetria; e uma simulação de 72 horas, com pacotes gerados por programa e processados pelo próprio pipeline. Em ambas, a conferência entre contadores fecha sem divergência. A operação real não completou as 72 horas previstas no enunciado, e a validação com três ou mais nós reais e com nó alcançado por salto ainda depende de dados que a rede não produziu.
 
 **Palavras-chave:** Meshtastic; LoRa; pipeline de dados; deduplicação; MariaDB; Redis.
 
@@ -101,7 +101,7 @@ O pipeline é empacotado em um `Dockerfile` e executado como processo contínuo 
 
 ### 7.1 Contadores
 
-A operação contínua real teve início em **27/10/2026 às 13:50**, quando o rádio `!8fa673bc` passou a operar como gateway. A janela de 72 horas reais termina em **30/10/2026 às 13:50**, e os números finais serão atualizados ao seu término. Os valores reais da Tabela 4 correspondem ao retrato de 27/10/2026 às 20:20, após cerca de 6 horas e 30 minutos de operação. Ao lado, constam os contadores da simulação, descrita na seção 7.5.
+A operação real teve início em **27/10/2026 às 13:50**, quando o rádio `!8fa673bc` passou a operar como gateway, e foi encerrada no mesmo dia, **às 22:12**, após cerca de 8 horas e 20 minutos, sem completar a janela de 72 horas prevista no enunciado (seção 8). Os valores reais da Tabela 4 correspondem ao retrato de 27/10/2026 às 20:20. No encerramento, os contadores finais eram: 19 pacotes processados, 19 válidos, 0 duplicatas, 0 em quarentena, 0 timestamps inválidos, 2 pacotes sem métrica e 85 medidas gravadas, com a conferência fechada (19 = 19). Ao lado, constam os contadores da simulação, descrita na seção 7.5.
 
 ![tabela contadores](artigo/05_tabela_contadores.png)
 
@@ -126,7 +126,7 @@ ORDER BY dia DESC, no;
 
 ![real series](artigo/09_real_series.png)
 
-O nó `!8fa673bc` registrou média de 4,448 V, com variação de apenas 0,005 V em 14 leituras. O valor `battery_level` igual a 101 indica alimentação externa: o rádio está ligado à tomada, e a curva plana é o resultado esperado.
+No retrato de 20:20, o nó `!8fa673bc` registrou média de 4,448 V, com variação de apenas 0,005 V em 14 leituras; no encerramento, eram 17 leituras, com médias de 4,448 V em 27/10 e 4,447 V em 28/10 (UTC). O valor `battery_level` igual a 101 indica alimentação externa: o rádio está ligado à tomada, e a curva plana é o resultado esperado.
 
 ### 7.3 Consulta 2: utilização do canal por hora
 
@@ -172,7 +172,7 @@ ORDER BY silencio_atual_min DESC;
 
 ![q3 real](artigo/08_q3_real.png)
 
-O maior intervalo observado foi de 30,0 minutos, igual ao período configurado de telemetria, sem nenhuma lacuna registrada.
+O maior intervalo observado foi de 30,0 minutos, igual ao período configurado de telemetria, sem nenhuma lacuna registrada. O resultado se manteve no encerramento, com 19 pacotes.
 
 ### 7.5 Simulação controlada de 72 horas
 
@@ -197,11 +197,12 @@ Na Tabela 8, o nó `!51b00005` aparece com maior intervalo de 239,0 minutos, 4 l
 - **Perda de conexão com o MariaDB.** Às 06:01 de 27/10, o pipeline perdeu a conexão com o banco. O erro foi registrado, a operação foi repetida e o processo se recuperou sem perder nem duplicar dados, comportamento previsto na seção 4.
 - **Reconfiguração do rádio como gateway.** Para que o rádio `!8fa673bc` passasse a operar como gateway, o servidor MQTT, antes apontado para a Mesh Brasil, foi substituído pelo broker da disciplina, via Wi-Fi. O firmware só aceitou a alteração com o Wi-Fi já ativo e exigiu a gravação das demais opções de MQTT uma a uma.
 - **Intervalo esperado ajustado.** O pipeline iniciou configurado para telemetria a cada 15 minutos (limite de lacuna de 30 minutos), mas o firmware aceita no mínimo 30 minutos no canal público, o que geraria lacunas falsas. O parâmetro foi corrigido para 30 minutos (limite de 60 minutos), e o pipeline foi reiniciado às 20:13 de 27/10, antes do surgimento de qualquer lacuna, retomando a partir do checkpoint.
-- **Limitação dos dados reais.** Apenas um nó real publica telemetria. Os requisitos de três ou mais nós e de nó alcançado somente por salto ainda não aparecem nos dados reais.
+- **Encerramento antecipado da coleta real.** Em 27/10 às 22:12, o consumidor e o pipeline foram desligados e o rádio `!8fa673bc` voltou à configuração anterior, com o MQTT apontado para a Mesh Brasil. A operação real somou cerca de 8 horas e 20 minutos e não cumpriu as 72 horas de operação contínua do requisito 5; a simulação da seção 7.5 complementa, mas não substitui, essa evidência.
+- **Limitação dos dados reais.** Apenas um nó real publicou telemetria. Os requisitos de três ou mais nós e de nó alcançado somente por salto não aparecem nos dados reais.
 
 ## 9 Considerações finais
 
-O pipeline atende ao que o enunciado propõe: deduplica por identidade, adota o instante de recebimento como referência temporal, registra lacunas sem interpolar, isola o que é inválido com motivo e mantém a conferência dos contadores, tanto na simulação quanto na operação real. As decisões de modelagem (série longa, agregação por hora e por dia e Redis como cache derivado do último valor) foram tomadas em função do intervalo real de telemetria e das perguntas que o painel e os alertas da próxima atividade precisarão responder. O que ainda falta é volume de dado real: a janela de 72 horas termina em 30/10/2026 às 13:50, e a validação com três nós e com nó alcançado por salto depende de a rede produzi-los. Os números serão atualizados ao fim da janela.
+O pipeline atende ao que o enunciado propõe: deduplica por identidade, adota o instante de recebimento como referência temporal, registra lacunas sem interpolar, isola o que é inválido com motivo e mantém a conferência dos contadores, tanto na simulação quanto na operação real. As decisões de modelagem (série longa, agregação por hora e por dia e Redis como cache derivado do último valor) foram tomadas em função do intervalo real de telemetria e das perguntas que o painel e os alertas da próxima atividade precisarão responder. A principal limitação é o volume de dado real: a coleta foi encerrada após cerca de 8 horas, abaixo das 72 horas previstas, com um único nó, e a validação com três nós e com nó alcançado por salto depende de a rede produzi-los. Como o checkpoint permanece gravado, a coleta pode ser retomada do ponto em que parou, sem perda nem duplicação, quando o gateway voltar a publicar.
 
 ## Referências
 
